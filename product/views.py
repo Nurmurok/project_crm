@@ -175,6 +175,7 @@ class FilterByUserid(APIView):
         data['quantity_of_posts'] = posts.count()
         return Response(data)
 
+#как вычислить сумму price и вывести
 class UserSaleApiView(APIView):
     permission_classes = [permissions.AllowAny]
     parser_classes = [JSONParser]
@@ -193,14 +194,11 @@ class UserSaleApiView(APIView):
         serializer2 = SaleSerializer(posts, many=True)
         data = serializer.data
         data['sale'] = serializer2.data
-        # dict=data['sale']
-        # sale = len(data['sale'])
-        # i=0
-        # while i in dict :
-        #     price= data['sale'][:][1]['price']
-        #     quantity= data['sale'][:][1]['quantity']
-        #     sum = price*quantity
-        #     print((sum))
+
+        price= data['sale'][:][1]['price']
+        quantity= data['sale'][:][1]['quantity']
+        sum = price*quantity
+        print((sum))
 
         return Response(data)
 
