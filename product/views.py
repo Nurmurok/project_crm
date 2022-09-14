@@ -1,8 +1,5 @@
 from django.contrib.auth.models import User
 from django.http import Http404
-
-from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
 from rest_framework.response import Response
@@ -10,7 +7,7 @@ from rest_framework.response import Response
 from user.serializers import UserSerializer
 from .models import Product, Category
 from rest_framework.views import APIView
-from .serializers import ProductSerializer, CategorySerializer
+from .serializers import ProductSerializer, CategorySerializer, SaleSerializer
 from rest_framework import permissions, status, pagination, viewsets, generics
 from django.core.paginator import Paginator
 from user.permissions import IsOwnerOrReadOnly, AnonPermissionOnly
@@ -178,5 +175,32 @@ class FilterByUserid(APIView):
         data['quantity_of_posts'] = posts.count()
         return Response(data)
 
+class UserSaleApiView(APIView):
+    permission_classes = [permissions.AllowAny]
+    parser_classes = [JSONParser]
 
+    def get_object(self, id):
+        try:
+            return User.objects.get(id=id)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id):
+        user = self.get_object(id)
+        posts = Product.objects.filter(author_id=id)
+        serializer = UserSerializer(user)
+
+        serializer2 = SaleSerializer(posts, many=True)
+        data = serializer.data
+        data['sale'] = serializer2.data
+        # dict=data['sale']
+        # sale = len(data['sale'])
+        # i=0
+        # while i in dict :
+        #     price= data['sale'][:][1]['price']
+        #     quantity= data['sale'][:][1]['quantity']
+        #     sum = price*quantity
+        #     print((sum))
+
+        return Response(data)
 

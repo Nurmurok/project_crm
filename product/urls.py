@@ -10,7 +10,7 @@ from .views import(
     FilterByCategory,
     CategoryDestroyApiView,
     FilterByPrice,
-    FilterByUserid,
+    FilterByUserid,UserSaleApiView
 )
 
 urlpatterns = [
@@ -25,6 +25,7 @@ urlpatterns = [
     path('filter_by_category/<slug:name>/', FilterByCategory.as_view(), name='filter-cat'),
     path('filter_by_price/', FilterByPrice.as_view(), name='filter-price'),
     path('filter_by_user_id/<int:id>/', FilterByUserid.as_view(), name='filter-username'),
+    path('sale/<int:id>',UserSaleApiView.as_view(), name='sale')
 
 
 ]

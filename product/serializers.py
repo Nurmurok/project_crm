@@ -15,3 +15,8 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['name']
 
+class SaleSerializer(serializers.ModelSerializer):
+    sum = serializers.IntegerField(required=False)
+    class Meta:
+        model = Product
+        fields = ['price','quantity','sum']
