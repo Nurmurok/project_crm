@@ -77,3 +77,4 @@ class PhoneRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'user', 'phone_number']
+

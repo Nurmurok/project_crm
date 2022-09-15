@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.http import Http404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
 from rest_framework.response import Response
@@ -8,21 +9,16 @@ from user.serializers import UserSerializer
 from .models import Product, Category
 from rest_framework.views import APIView
 from .serializers import ProductSerializer, CategorySerializer, SaleSerializer
-from rest_framework import permissions, status, pagination, viewsets, generics
+from rest_framework import permissions, status, pagination, viewsets, generics, filters
 from django.core.paginator import Paginator
-from user.permissions import IsOwnerOrReadOnly, AnonPermissionOnly
 
 
-class ProductListApiView(APIView):
-    permission_classes = [permissions.AllowAny]
+class ProductListApiView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category', 'price']
 
-    def get(self,  request):
-        products = Product.objects.all()
-        paginator = Paginator(products, 5)
-        page_num = self.request.query_params.get('page')
-        print(page_num)
-        serializers = ProductSerializer(paginator.page(page_num), many=True)
-        return Response(serializers.data)
 
 
 class ProductCreateApiView(APIView):
@@ -84,16 +80,15 @@ class ProductDestroyApiView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
 class CategoryListApiView(APIView):
-    permission_classes = [permissions.AllowAny]
-    def get(self,  request):
+
+    def get(self, request):
         category = Category.objects.all()
-        paginator = Paginator(category, 1)
-        page_num = self.request.query_params.get('page')
-        print(page_num)
-        serializers = CategorySerializer(paginator.page(page_num), many=True)
+        serializers = CategorySerializer(category, many=True)
+
         return Response(serializers.data)
+
+
 
 
 class CategoryCreateApiView(APIView):
@@ -141,20 +136,8 @@ class FilterByCategory(APIView):
 
         return Response(data)
 
-#не работает
-class FilterByPrice(generics.ListAPIView):
-    serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        max_price = self.request.query_params.get('price')
-        min_price = self.request.query_params.get('price')
-
-        queryset = queryset.filter(price__range=(min_price,max_price))
-        return queryset
 
 
-# как вывести только продукты без данных юзера
 class FilterByUserid(APIView):
     permission_classes = [permissions.AllowAny]
     parser_classes = [JSONParser]
@@ -173,32 +156,5 @@ class FilterByUserid(APIView):
         data = serializer.data
         data['posts'] = serializer2.data
         data['quantity_of_posts'] = posts.count()
-        return Response(data)
-
-#как вычислить сумму price и вывести
-class UserSaleApiView(APIView):
-    permission_classes = [permissions.AllowAny]
-    parser_classes = [JSONParser]
-
-    def get_object(self, id):
-        try:
-            return User.objects.get(id=id)
-        except User.DoesNotExist:
-            raise Http404
-
-    def get(self, request, id):
-        user = self.get_object(id)
-        posts = Product.objects.filter(author_id=id)
-        serializer = UserSerializer(user)
-
-        serializer2 = SaleSerializer(posts, many=True)
-        data = serializer.data
-        data['sale'] = serializer2.data
-
-        price= data['sale'][:][1]['price']
-        quantity= data['sale'][:][1]['quantity']
-        sum = price*quantity
-        print((sum))
-
         return Response(data)
 

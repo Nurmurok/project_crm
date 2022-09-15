@@ -10,10 +10,12 @@ from .serializers import MyTokenObtainPairSerializer
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer
 from .permissions import AnonPermissionOnly
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics
 from .serializers import UserSerializer
 from rest_framework import permissions, status
 from rest_framework.generics import (
-    CreateAPIView,
+    CreateAPIView, ListAPIView,
 
 )
 
@@ -28,21 +30,16 @@ class RegisterView(CreateAPIView):
     permission_classes = (AnonPermissionOnly,)
     serializer_class = RegisterSerializer
 
-
-class UserListView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request):
-        users = User.objects.all()
-        paginator = Paginator(users, 5)
-        page_num = self.request.query_params.get('page')
-
-        serializers = UserSerializer(paginator.page(page_num), many=True)
-        return Response(serializers.data)
+#список с пагинацией, filter by username, em
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email']
 
 
 class UserDetailApiView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     parser_classes = [JSONParser]
 
     def get_object(self, id):
@@ -74,7 +71,6 @@ class UserDestroyApiView(APIView):
         user = self.get_object(id)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 

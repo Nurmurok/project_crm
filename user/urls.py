@@ -7,7 +7,7 @@ from user.views import (
     MyObtainPairView,
     UserListView,
 UserDetailApiView,
-UserDestroyApiView,
+UserDestroyApiView
 
 
 )
@@ -19,5 +19,4 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegisterView.as_view(), name='register'),
     path('delete/<int:id>/', UserDestroyApiView.as_view(), name='user-list'),
-    path('detail/<int:id>/', UserDetailApiView.as_view(), name='user-list'),
-]
+    path('detail/<int:id>/', UserDetailApiView.as_view(), name='user-list')]

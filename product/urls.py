@@ -9,8 +9,8 @@ from .views import(
     CategoryCreateApiView,
     FilterByCategory,
     CategoryDestroyApiView,
-    FilterByPrice,
-    FilterByUserid,UserSaleApiView
+
+    FilterByUserid
 )
 
 urlpatterns = [
@@ -23,9 +23,8 @@ urlpatterns = [
     path('cat_create/', CategoryCreateApiView.as_view(), name='cat-create'),
     path('delete/category/<int:id>/', CategoryDestroyApiView.as_view(), name='cat-create'),
     path('filter_by_category/<slug:name>/', FilterByCategory.as_view(), name='filter-cat'),
-    path('filter_by_price/', FilterByPrice.as_view(), name='filter-price'),
     path('filter_by_user_id/<int:id>/', FilterByUserid.as_view(), name='filter-username'),
-    path('sale/<int:id>',UserSaleApiView.as_view(), name='sale')
+
 
 
 ]
