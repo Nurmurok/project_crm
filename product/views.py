@@ -126,9 +126,9 @@ class FilterByCategory(APIView):
         except Category.DoesNotExist:
             raise Http404
 
-    def get(self, request, name):
+    def get(self, request, name, price):
         category = self.get_object(name)
-        product = Product.objects.filter(category__name=name)
+        product = Product.objects.filter(Q(category__name=name) & Q(price__gte=int(price)))
         serializer = CategorySerializer(category)
         serializer2 = ProductSerializer(product, many=True)
         data = serializer.data

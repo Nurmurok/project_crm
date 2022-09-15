@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from product.models import Product
 from product.serializers import ProductSerializer
-from .serializers import MyTokenObtainPairSerializer
+from .serializers import MyTokenObtainPairSerializer, AccountSerializer
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer
 from .permissions import AnonPermissionOnly
@@ -14,6 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from .serializers import UserSerializer
 from rest_framework import permissions, status
+from .models import Account
 from rest_framework.generics import (
     CreateAPIView, ListAPIView,
 
@@ -25,13 +26,33 @@ class MyObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class RegisterView(CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = (AnonPermissionOnly,)
-    serializer_class = RegisterSerializer
+class RegisterAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+    parser_classes = [JSONParser]
+
+    def post(self, request):
+        serializer = AccountSerializer(data=request.data)
+        serializer2 = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.create(
+                username=request.data['username']
+            )
+            user.set_password(request.data['password'])
+            user.save()
+            account = Account.objects.create(
+                user=user,
+                phone_number=request.data['phone_number']
+            )
+            account.save()
+            print(request.data['password'])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 #список с пагинацией, filter by username, em
 class UserListView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter]

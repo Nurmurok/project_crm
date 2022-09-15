@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 
+from user.models import Account
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,6 +19,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    phone_number = serializers.IntegerField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
@@ -58,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff']
+        fields = ['id', 'username', 'email']
 
 
 class PhoneSerializer(serializers.ModelSerializer):
@@ -77,4 +82,39 @@ class PhoneRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'user', 'phone_number']
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password]
+    )
+    password2 = serializers.CharField(
+        write_only=True,
+        required=True
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+
+    class Meta:
+        model = Account
+        fields = [
+            'username',
+            'phone_number',
+            'email',
+            'password',
+            'password2'
+        ]
+
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn`t match."}
+            )
+        return attrs
 

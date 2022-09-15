@@ -13,4 +13,4 @@ class UserListSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'author', 'name', 'price')
+        fields = ( 'name', 'price', 'date_time')

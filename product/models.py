@@ -18,7 +18,7 @@ class Product(models.Model):
     price = models.IntegerField(null=False, blank=False)
     image = models.ImageField(default='default.jpg', upload_to='post_image/')
     quantity = models.IntegerField(null=False, blank=False)
-    post_date = models.DateTimeField(default=timezone.now)
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
