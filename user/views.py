@@ -75,7 +75,7 @@ class UserDetailApiView(APIView):
         serializer = UserSerializer(user)
         serializer2 = ProductSerializer(posts, many=True)
         data = serializer.data
-        data['posts'] = serializer2.data
+        data['products'] = serializer2.data
         data['quantity_of_posts'] = posts.count()
         return Response(data)
 
